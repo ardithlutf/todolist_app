@@ -426,6 +426,14 @@ class _DashboardPageState extends State<DashboardPage>
                                                       ? tasksLists[index]
                                                       : filteredTasks[index];
 
+                                                  final isLastItem = index == ((_searchController.text.isEmpty
+                                                      ? (tasksLists.length > 3
+                                                      ? !seemore_vsb
+                                                      ? tasksLists.length
+                                                      : 3
+                                                      : tasksLists.length)
+                                                      : filteredTasks.length) - 1);
+
                                                   return Dismissible(
                                                     key: UniqueKey(),
                                                     onDismissed: (_) {
@@ -456,108 +464,111 @@ class _DashboardPageState extends State<DashboardPage>
                                                                 Colors.white),
                                                       ),
                                                     ),
-                                                    child: ListTile(
-                                                      leading: Checkbox(
-                                                        value: todo.status ==
-                                                            StatusEnum
-                                                                .completed.name,
-                                                        onChanged: (_) {
-                                                          _todoBloc.add(
-                                                              TodoEvent.toggle(
-                                                                  task: todo,
-                                                                  status: StatusEnum
-                                                                      .completed));
-                                                        },
-                                                      ),
-                                                      trailing: IconButton(
-                                                          iconSize: 18,
-                                                          icon: const Icon(
-                                                              Icons.edit),
-                                                          onPressed: () {
-                                                            context.pushNamed(
-                                                                AppRouter
-                                                                    .addTodo,
-                                                                extra: {
-                                                                  'isUpdate':
-                                                                      true,
-                                                                  'data': todo,
-                                                                });
-                                                          },
-                                                          color: state
-                                                                  .isDarkMode
-                                                              ? AppThemes
-                                                                  .darkTheme
-                                                                  .textTheme
-                                                                  .titleMedium!
-                                                                  .color
-                                                              : AppThemes
-                                                                  .lightTheme
-                                                                  .textTheme
-                                                                  .titleMedium!
-                                                                  .color),
-                                                      title: Text(
-                                                        todo.title,
-                                                        style: TextStyle(
-                                                          color: state
-                                                                  .isDarkMode
-                                                              ? AppThemes
-                                                                  .darkTheme
-                                                                  .textTheme
-                                                                  .titleSmall!
-                                                                  .color
-                                                              : AppThemes
-                                                                  .lightTheme
-                                                                  .textTheme
-                                                                  .titleSmall!
-                                                                  .color,
-                                                          decoration: todo
-                                                                      .status ==
-                                                                  StatusEnum
-                                                                      .completed
-                                                                      .name
-                                                              ? TextDecoration
-                                                                  .lineThrough
-                                                              : null,
-                                                        ),
-                                                      ),
-                                                      subtitle: todo.status ==
+                                                    child: Padding(
+                                                      padding: EdgeInsets.only(bottom: isLastItem ? 48.0 : 0),
+                                                      child: ListTile(
+                                                        leading: Checkbox(
+                                                          value: todo.status ==
                                                               StatusEnum
-                                                                  .inProgress
-                                                                  .name
-                                                          ? Row(
-                                                              children: [
-                                                                Icon(
-                                                                    Icons
-                                                                        .pending_actions,
-                                                                    size: 12,
-                                                                    color: !state.isDarkMode
-                                                                        ? Colors
-                                                                            .black
-                                                                        : Colors
-                                                                            .white),
-                                                                Text(
-                                                                  ' in progress',
-                                                                  style:
-                                                                      TextStyle(
-                                                                    fontSize:
-                                                                        11,
-                                                                    // fontStyle: FontStyle.italic,
-                                                                    color: state.isDarkMode
-                                                                        ? AppThemes
-                                                                            .darkTheme
-                                                                            .textTheme
-                                                                            .labelSmall!
-                                                                            .color
-                                                                        : AppThemes
-                                                                            .lightTheme
-                                                                            .textTheme
-                                                                            .labelSmall!
-                                                                            .color,
+                                                                  .completed.name,
+                                                          onChanged: (_) {
+                                                            _todoBloc.add(
+                                                                TodoEvent.toggle(
+                                                                    task: todo,
+                                                                    status: StatusEnum
+                                                                        .completed));
+                                                          },
+                                                        ),
+                                                        trailing: IconButton(
+                                                            iconSize: 18,
+                                                            icon: const Icon(
+                                                                Icons.edit),
+                                                            onPressed: () {
+                                                              context.pushNamed(
+                                                                  AppRouter
+                                                                      .addTodo,
+                                                                  extra: {
+                                                                    'isUpdate':
+                                                                        true,
+                                                                    'data': todo,
+                                                                  });
+                                                            },
+                                                            color: state
+                                                                    .isDarkMode
+                                                                ? AppThemes
+                                                                    .darkTheme
+                                                                    .textTheme
+                                                                    .titleMedium!
+                                                                    .color
+                                                                : AppThemes
+                                                                    .lightTheme
+                                                                    .textTheme
+                                                                    .titleMedium!
+                                                                    .color),
+                                                        title: Text(
+                                                          todo.title,
+                                                          style: TextStyle(
+                                                            color: state
+                                                                    .isDarkMode
+                                                                ? AppThemes
+                                                                    .darkTheme
+                                                                    .textTheme
+                                                                    .titleSmall!
+                                                                    .color
+                                                                : AppThemes
+                                                                    .lightTheme
+                                                                    .textTheme
+                                                                    .titleSmall!
+                                                                    .color,
+                                                            decoration: todo
+                                                                        .status ==
+                                                                    StatusEnum
+                                                                        .completed
+                                                                        .name
+                                                                ? TextDecoration
+                                                                    .lineThrough
+                                                                : null,
+                                                          ),
+                                                        ),
+                                                        subtitle: todo.status ==
+                                                                StatusEnum
+                                                                    .inProgress
+                                                                    .name
+                                                            ? Row(
+                                                                children: [
+                                                                  Icon(
+                                                                      Icons
+                                                                          .pending_actions,
+                                                                      size: 12,
+                                                                      color: !state.isDarkMode
+                                                                          ? Colors
+                                                                              .black
+                                                                          : Colors
+                                                                              .white),
+                                                                  Text(
+                                                                    ' in progress',
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          11,
+                                                                      // fontStyle: FontStyle.italic,
+                                                                      color: state.isDarkMode
+                                                                          ? AppThemes
+                                                                              .darkTheme
+                                                                              .textTheme
+                                                                              .labelSmall!
+                                                                              .color
+                                                                          : AppThemes
+                                                                              .lightTheme
+                                                                              .textTheme
+                                                                              .labelSmall!
+                                                                              .color,
+                                                                    ),
                                                                   ),
-                                                                ),
-                                                              ],
-                                                            )
-                                                          : null,
+                                                                ],
+                                                              )
+                                                            : null,
+                                                      ),
                                                     ),
                                                   );
                                                 }),

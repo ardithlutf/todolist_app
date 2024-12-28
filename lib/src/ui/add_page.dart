@@ -99,7 +99,8 @@ class _AddTodoScreenState extends State<AddTodoScreen>
                         color: state.isDarkMode
                             ? Colors.black
                             : const Color(0xFFFFFFFF),
-                        borderRadius: const BorderRadius.all(Radius.circular(10)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10)),
                         boxShadow: const [
                           BoxShadow(
                             color: Color(0x1a9E9E9E),
@@ -116,7 +117,8 @@ class _AddTodoScreenState extends State<AddTodoScreen>
                         style: TextStyle(
                           color: state.isDarkMode
                               ? AppThemes.darkTheme.textTheme.labelSmall!.color
-                              : AppThemes.lightTheme.textTheme.labelSmall!.color,
+                              : AppThemes
+                                  .lightTheme.textTheme.labelSmall!.color,
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                         ),
@@ -144,7 +146,8 @@ class _AddTodoScreenState extends State<AddTodoScreen>
                         color: state.isDarkMode
                             ? Colors.black
                             : const Color(0xFFFFFFFF),
-                        borderRadius: const BorderRadius.all(Radius.circular(10)),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(10)),
                         boxShadow: const [
                           BoxShadow(
                             color: Color(0x1a9E9E9E),
@@ -159,7 +162,8 @@ class _AddTodoScreenState extends State<AddTodoScreen>
                         style: TextStyle(
                           color: state.isDarkMode
                               ? AppThemes.darkTheme.textTheme.labelSmall!.color
-                              : AppThemes.lightTheme.textTheme.labelSmall!.color,
+                              : AppThemes
+                                  .lightTheme.textTheme.labelSmall!.color,
                           fontSize: 16,
                           fontWeight: FontWeight.w400,
                         ),
@@ -209,27 +213,25 @@ class _AddTodoScreenState extends State<AddTodoScreen>
                                   alignment: Alignment.centerLeft,
                                   value: _dropdownValue,
                                   items: StatusEnum.values
-                                      .map<DropdownMenuItem<String>>(
-                                          (StatusEnum item) =>
-                                              DropdownMenuItem<String>(
-                                                value: item.name,
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.symmetric(
-                                                          horizontal: 10.0),
-                                                  child: Text(
-                                                    item.name,
-                                                    textAlign: TextAlign.start,
-                                                    style: state.isDarkMode
-                                                        ? AppThemes.darkTheme
-                                                            .textTheme.labelSmall!
-                                                        : AppThemes
-                                                            .lightTheme
-                                                            .textTheme
-                                                            .labelSmall!,
-                                                  ),
-                                                ),
-                                              ))
+                                      .map<DropdownMenuItem<String>>((StatusEnum
+                                              item) =>
+                                          DropdownMenuItem<String>(
+                                            value: item.name,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10.0),
+                                              child: Text(
+                                                item.name,
+                                                textAlign: TextAlign.start,
+                                                style: state.isDarkMode
+                                                    ? AppThemes.darkTheme
+                                                        .textTheme.labelSmall!
+                                                    : AppThemes.lightTheme
+                                                        .textTheme.labelSmall!,
+                                              ),
+                                            ),
+                                          ))
                                       .toList(),
                                   onChanged: (String? value) {
                                     setState(() {
@@ -350,6 +352,18 @@ class _AddTodoScreenState extends State<AddTodoScreen>
                                 : AppThemes.lightTheme.elevatedButtonTheme,
                           ),
                           child: ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor: const WidgetStatePropertyAll(
+                                  Color.fromRGBO(242, 110, 86, 1)),
+                              shadowColor:
+                                  const WidgetStatePropertyAll(Colors.black),
+                              shape: WidgetStateProperty.all<
+                                  RoundedRectangleBorder>(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                              ),
+                            ),
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {
                                 if (widget.isUpdate) {
@@ -371,8 +385,9 @@ class _AddTodoScreenState extends State<AddTodoScreen>
                               }
                             },
                             child: Text(widget.isUpdate ? 'Update' : 'Add',
-                                style:
-                                    AppThemes.lightTheme.textTheme.labelMedium!.copyWith(color: Colors.white)),
+                                style: AppThemes
+                                    .lightTheme.textTheme.labelMedium!
+                                    .copyWith(color: Colors.white)),
                           ),
                         ),
                       ),
