@@ -45,7 +45,7 @@ dependencies:
   get_it: ^8.0.3
   dio: ^5.7.0
   freezed_annotation: ^2.4.4
-  path_provider: ^2.0.1
+  path_provider: ^2.1.5
   json_annotation: ^4.0.0
   fluttermoji: ^1.0.2
   flutter_svg: ^2.0.16
