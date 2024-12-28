@@ -82,6 +82,7 @@ class Welcome extends StatelessWidget {
                             : Icons.bubble_chart),
                       ),
                     ),
+                    AppSpacing.horizontalSpacing8,
                     BlocListener<AuthBloc, AuthState>(
                         listener: (context, state) {
                           if (state.status == UIStatusAuth.logout) {

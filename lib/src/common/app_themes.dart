@@ -82,12 +82,13 @@ class AppThemes {
         menuStyle: const MenuStyle(
             backgroundColor: WidgetStatePropertyAll(_lightBackgroundColor),
             padding: WidgetStatePropertyAll(EdgeInsets.all(8.0)))),
-    // elevatedButtonTheme: ElevatedButtonThemeData(
-    //     style: ButtonStyle(
-    //   textStyle: WidgetStatePropertyAll(_lightTextTheme.labelMedium!.copyWith(color: Colors.white)),
-    //   backgroundColor:
-    //       const WidgetStatePropertyAll(Color.fromRGBO(86, 148, 242, 1)),
-    // )),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ButtonStyle(
+      textStyle: WidgetStatePropertyAll(
+          _lightTextTheme.labelMedium!..copyWith(color: Colors.white)),
+      backgroundColor:
+          const WidgetStatePropertyAll(Color.fromRGBO(242, 110, 86, 1)),
+    )),
     bottomNavigationBarTheme: const BottomNavigationBarThemeData(
       backgroundColor: Colors.transparent, // Change the background color here
       selectedItemColor: Colors.white, // Change the selected item color
