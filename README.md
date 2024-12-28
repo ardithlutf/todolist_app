@@ -26,7 +26,7 @@ Pastikan Anda telah menginstal hal-hal berikut:
 
 1. Clone repository:
    ```bash
-   git clone https://github.com/namaanda/flutter_todo_app.git
+   git clone https://github.com/ardithlutf/todolist_app
    cd flutter_todo_app
    ```
 
