@@ -5,14 +5,19 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart' hide JsonKey;
 import 'package:todolist_app/src/common/enums.dart';
 import 'package:todolist_app/src/database/appdatabase.dart';
+import 'package:todolist_app/src/services/local_storage_service/local_storage_service.dart';
 
 part 'todo_event.dart';
 part 'todo_state.dart';
 part 'todo_bloc.freezed.dart';
 
 class TodoBloc extends Bloc<TodoEvent, TodoState> {
-  final DatabaseManager database;
-  TodoBloc(this.database) : super(const TodoState()) {
+  TodoBloc({
+    required DatabaseManager databaseManager,
+    required LocalStorageService localStorageService,
+  }) : super(const TodoState()) {
+    _databaseManager = databaseManager;
+    _localStorageService = localStorageService;
     on<_LoadTodo>(_onLoadTodo);
     on<_AddTodo>(_onAddTodo);
     on<_ToggleTodo>(_onToggleTodo);
@@ -21,20 +26,13 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
     on<_SearchTodo>(_onSearchTodo);
   }
 
+  late DatabaseManager _databaseManager;
+  late LocalStorageService _localStorageService;
+
   Future<void> _onLoadTodo(_LoadTodo event, Emitter<TodoState> emit) async {
     emit(state.copyWith(status: UIStatusTodo.loading));
     try {
-      List<TaskData> tasks = await database.getAllTask();
-      if (event.filterStatus != null) {
-        List<TaskData> tasksFiltered =
-            tasks.where((e) => e.status == event.filterStatus!.name).toList();
-        emit(state.copyWith(
-            status: UIStatusTodo.loadedFiltered,
-            tasks: tasks,
-            tasksFiltered: tasksFiltered));
-        return;
-      }
-      emit(state.copyWith(status: UIStatusTodo.loaded, tasks: tasks));
+      await _lookupFilterTasks(event, emit);
     } catch (e) {
       emit(state.copyWith(status: UIStatusTodo.error, error: e.toString()));
     }
@@ -43,7 +41,7 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
   Future<void> _onAddTodo(_AddTodo event, Emitter<TodoState> emit) async {
     emit(state.copyWith(status: UIStatusTodo.loading));
     try {
-      await database.insertTask(
+      await _databaseManager.insertTask(
         TaskCompanion.insert(
           title: event.title,
           description: Value(event.description),
@@ -51,9 +49,7 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
           status: StatusEnum.pending.name,
         ),
       );
-      final tasks = await database.getAllTask();
-
-      emit(state.copyWith(status: UIStatusTodo.loaded, tasks: tasks));
+      await _lookupFilterTasks(event, emit);
     } catch (e) {
       emit(state.copyWith(status: UIStatusTodo.error, error: e.toString()));
     }
@@ -70,11 +66,9 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
         status: StatusEnum.completed.name,
       );
 
-      await database.updateTask(data);
+      await _databaseManager.updateTask(data);
 
-      final tasks = await database.getAllTask();
-
-      emit(state.copyWith(status: UIStatusTodo.loaded, tasks: tasks));
+      await _lookupFilterTasks(event, emit);
     } catch (e) {
       emit(state.copyWith(status: UIStatusTodo.error, error: e.toString()));
     }
@@ -90,11 +84,9 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
         status: event.status,
       );
 
-      await database.updateTask(data);
+      await _databaseManager.updateTask(data);
 
-      final tasks = await database.getAllTask();
-
-      emit(state.copyWith(status: UIStatusTodo.loaded, tasks: tasks));
+      await _lookupFilterTasks(event, emit);
     } catch (e) {
       emit(state.copyWith(status: UIStatusTodo.error, error: e.toString()));
     }
@@ -103,11 +95,9 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
   Future<void> _onDeleteTodo(_DeleteTodo event, Emitter<TodoState> emit) async {
     emit(state.copyWith(status: UIStatusTodo.loading));
     try {
-      await database.deleteTask(event.id);
+      await _databaseManager.deleteTask(event.id);
 
-      final tasks = await database.getAllTask();
-
-      emit(state.copyWith(status: UIStatusTodo.loaded, tasks: tasks));
+      await _lookupFilterTasks(event, emit);
     } catch (e) {
       emit(state.copyWith(status: UIStatusTodo.error, error: e.toString()));
     }
@@ -116,10 +106,25 @@ class TodoBloc extends Bloc<TodoEvent, TodoState> {
   Future<void> _onSearchTodo(_SearchTodo event, Emitter<TodoState> emit) async {
     emit(state.copyWith(status: UIStatusTodo.loading));
     try {
-      final tasks = await database.searchTask(event.title);
+      final tasks = await _databaseManager.searchTask(event.title);
       emit(state.copyWith(status: UIStatusTodo.loaded, tasks: tasks));
     } catch (e) {
       emit(state.copyWith(status: UIStatusTodo.error, error: e.toString()));
     }
+  }
+
+  _lookupFilterTasks(TodoEvent event, Emitter<TodoState> emit) async {
+    List<TaskData> tasks = await _databaseManager.getAllTask();
+
+    if (_localStorageService.status.isNotEmpty) {
+      List<TaskData> tasksFiltered =
+          tasks.where((e) => e.status == _localStorageService.status).toList();
+      emit(state.copyWith(
+          status: UIStatusTodo.loadedFiltered,
+          tasks: tasks,
+          tasksFiltered: tasksFiltered));
+      return;
+    }
+    emit(state.copyWith(status: UIStatusTodo.loaded, tasks: tasks));
   }
 }

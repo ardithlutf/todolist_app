@@ -15,12 +15,12 @@ class BlocModule {
 
     injector.registerFactory<AuthBloc>(
       () => AuthBloc(
-          reqResRepository: injector(),
-          localStorageService: injector()),
+          reqResRepository: injector(), localStorageService: injector()),
     );
 
     injector.registerFactory<TodoBloc>(
-      () => TodoBloc(injector()),
+      () => TodoBloc(
+          databaseManager: injector(), localStorageService: injector()),
     );
   }
 }

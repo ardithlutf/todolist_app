@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:todolist_app/src/common/enums.dart';
 import 'package:todolist_app/src/database/appdatabase.dart';
 import 'package:todolist_app/src/injector/injector.dart';
 import 'package:todolist_app/src/services/local_storage_service/local_storage_service.dart';
@@ -22,6 +23,7 @@ class AppRouter {
         redirect: (BuildContext context, GoRouterState state) {
           final bool isAlreadyLoggedIn =
               Injector.instance<LocalStorageService>().isLoggedIn;
+          Injector.instance<LocalStorageService>().setStatus(null);
           if (isAlreadyLoggedIn) {
             return AppRouter.home;
           } else {

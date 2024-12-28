@@ -5,7 +5,9 @@ import 'package:todolist_app/src/common/app_spacing.dart';
 import 'package:todolist_app/src/common/app_themes.dart';
 import 'package:todolist_app/src/common/enums.dart';
 import 'package:todolist_app/src/database/appdatabase.dart';
+import 'package:todolist_app/src/injector/injector.dart';
 import 'package:todolist_app/src/router/app_router.dart';
+import 'package:todolist_app/src/services/local_storage_service/local_storage_service.dart';
 import 'package:todolist_app/src/state/app/application_bloc.dart';
 import 'package:todolist_app/src/state/auth/auth_bloc.dart';
 import 'package:todolist_app/src/state/todo/todo_bloc.dart';
@@ -117,11 +119,12 @@ class _DashboardPageState extends State<DashboardPage>
     setState(() {
       _selectedCategoryId = categoryId;
 
-      _todoBloc.add(TodoEvent.load(
-          filterStatus: categories
-              .where((e) => e.id == _selectedCategoryId)
-              .first
-              .status));
+      final status =
+          categories.where((e) => e.id == _selectedCategoryId).first.status;
+
+      Injector.instance<LocalStorageService>().setStatus(status);
+
+      _todoBloc.add(const TodoEvent.load());
 
       _searchController.clear();
     });
@@ -241,7 +244,8 @@ class _DashboardPageState extends State<DashboardPage>
                                 }
                               });
                             }
-                            if (stateTodo.status == UIStatusTodo.loadedFiltered) {
+                            if (stateTodo.status ==
+                                UIStatusTodo.loadedFiltered) {
                               setState(() {
                                 tasksLists = stateTodo.tasksFiltered;
                                 filteredTasks = tasksLists
@@ -397,20 +401,31 @@ class _DashboardPageState extends State<DashboardPage>
                                             ),
                                             SliverList.builder(
                                                 itemCount: 1,
-                                                itemBuilder: (context, i) =>
-                                                    ListTile(
-                                                        title: Text(
-                                                            'Recent Task',
-                                                            style: state
-                                                                    .isDarkMode
+                                                itemBuilder: (context, i) => ListTile(
+                                                    title: Text('Recent Task',
+                                                        style: state.isDarkMode
+                                                            ? AppThemes
+                                                                .darkTheme
+                                                                .textTheme
+                                                                .titleSmall
+                                                            : AppThemes
+                                                                .lightTheme
+                                                                .textTheme
+                                                                .titleSmall),
+                                                    trailing: Injector.instance<LocalStorageService>()
+                                                            .status
+                                                            .isNotEmpty
+                                                        ? Text('(${Injector.instance<LocalStorageService>().status})',
+                                                            style: state.isDarkMode
                                                                 ? AppThemes
                                                                     .darkTheme
                                                                     .textTheme
-                                                                    .titleSmall
+                                                                    .labelSmall
                                                                 : AppThemes
                                                                     .lightTheme
                                                                     .textTheme
-                                                                    .titleSmall))),
+                                                                    .labelSmall)
+                                                        : null)),
                                             SliverList.builder(
                                                 itemCount: _searchController
                                                         .text.isEmpty
@@ -426,178 +441,199 @@ class _DashboardPageState extends State<DashboardPage>
                                                       ? tasksLists[index]
                                                       : filteredTasks[index];
 
-                                                  final isLastItem = index == ((_searchController.text.isEmpty
-                                                      ? (tasksLists.length > 3
-                                                      ? !seemore_vsb
-                                                      ? tasksLists.length
-                                                      : 3
-                                                      : tasksLists.length)
-                                                      : filteredTasks.length) - 1);
+                                                  final isLastItem = index ==
+                                                      ((_searchController
+                                                                  .text.isEmpty
+                                                              ? (tasksLists
+                                                                          .length >
+                                                                      3
+                                                                  ? !seemore_vsb
+                                                                      ? tasksLists
+                                                                          .length
+                                                                      : 3
+                                                                  : tasksLists
+                                                                      .length)
+                                                              : filteredTasks
+                                                                  .length) -
+                                                          1);
 
-                                                  return Dismissible(
-                                                    key: UniqueKey(),
-                                                    onDismissed: (_) {
-                                                      _todoBloc.add(
-                                                          TodoEvent.delete(
-                                                              id: todo.id));
-                                                    },
-                                                    background: Container(
-                                                      decoration: BoxDecoration(
-                                                          color: Colors.red
-                                                              .withOpacity(0.1),
-                                                          borderRadius:
-                                                              const BorderRadius
-                                                                  .all(Radius
-                                                                      .circular(
+                                                  return Column(
+                                                    children: [
+                                                      Dismissible(
+                                                        key: UniqueKey(),
+                                                        onDismissed: (_) {
+                                                          _todoBloc.add(
+                                                              TodoEvent.delete(
+                                                                  id: todo.id));
+                                                        },
+                                                        background: Container(
+                                                          decoration: BoxDecoration(
+                                                              color: Colors.red
+                                                                  .withOpacity(
+                                                                      0.1),
+                                                              borderRadius:
+                                                                  const BorderRadius
+                                                                      .all(
+                                                                      Radius.circular(
                                                                           20))),
-                                                      alignment:
-                                                          Alignment.centerRight,
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              right: 16),
-                                                      child: const CircleAvatar(
-                                                        backgroundColor:
-                                                            Colors.red,
-                                                        child: Icon(
-                                                            Icons.delete,
-                                                            color:
-                                                                Colors.white),
-                                                      ),
-                                                    ),
-                                                    child: Padding(
-                                                      padding: EdgeInsets.only(bottom: isLastItem ? 48.0 : 0),
-                                                      child: ListTile(
-                                                        leading: Checkbox(
-                                                          value: todo.status ==
-                                                              StatusEnum
-                                                                  .completed.name,
-                                                          onChanged: (_) {
-                                                            _todoBloc.add(
-                                                                TodoEvent.toggle(
-                                                                    task: todo,
-                                                                    status: StatusEnum
-                                                                        .completed));
-                                                          },
-                                                        ),
-                                                        trailing: IconButton(
-                                                            iconSize: 18,
-                                                            icon: const Icon(
-                                                                Icons.edit),
-                                                            onPressed: () {
-                                                              context.pushNamed(
-                                                                  AppRouter
-                                                                      .addTodo,
-                                                                  extra: {
-                                                                    'isUpdate':
-                                                                        true,
-                                                                    'data': todo,
-                                                                  });
-                                                            },
-                                                            color: state
-                                                                    .isDarkMode
-                                                                ? AppThemes
-                                                                    .darkTheme
-                                                                    .textTheme
-                                                                    .titleMedium!
-                                                                    .color
-                                                                : AppThemes
-                                                                    .lightTheme
-                                                                    .textTheme
-                                                                    .titleMedium!
-                                                                    .color),
-                                                        title: Text(
-                                                          todo.title,
-                                                          style: TextStyle(
-                                                            color: state
-                                                                    .isDarkMode
-                                                                ? AppThemes
-                                                                    .darkTheme
-                                                                    .textTheme
-                                                                    .titleSmall!
-                                                                    .color
-                                                                : AppThemes
-                                                                    .lightTheme
-                                                                    .textTheme
-                                                                    .titleSmall!
-                                                                    .color,
-                                                            decoration: todo
-                                                                        .status ==
-                                                                    StatusEnum
-                                                                        .completed
-                                                                        .name
-                                                                ? TextDecoration
-                                                                    .lineThrough
-                                                                : null,
+                                                          alignment: Alignment
+                                                              .centerRight,
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .only(
+                                                                  right: 16),
+                                                          child:
+                                                              const CircleAvatar(
+                                                            backgroundColor:
+                                                                Colors.red,
+                                                            child: Icon(
+                                                                Icons.delete,
+                                                                color: Colors
+                                                                    .white),
                                                           ),
                                                         ),
-                                                        subtitle: todo.status ==
+                                                        child: ListTile(
+                                                          leading: Checkbox(
+                                                            value: todo
+                                                                    .status ==
                                                                 StatusEnum
-                                                                    .inProgress
-                                                                    .name
-                                                            ? Row(
-                                                                children: [
-                                                                  Icon(
-                                                                      Icons
-                                                                          .pending_actions,
-                                                                      size: 12,
-                                                                      color: !state.isDarkMode
-                                                                          ? Colors
-                                                                              .black
-                                                                          : Colors
-                                                                              .white),
-                                                                  Text(
-                                                                    ' in progress',
-                                                                    style:
-                                                                        TextStyle(
-                                                                      fontSize:
-                                                                          11,
-                                                                      // fontStyle: FontStyle.italic,
-                                                                      color: state.isDarkMode
-                                                                          ? AppThemes
-                                                                              .darkTheme
-                                                                              .textTheme
-                                                                              .labelSmall!
-                                                                              .color
-                                                                          : AppThemes
-                                                                              .lightTheme
-                                                                              .textTheme
-                                                                              .labelSmall!
-                                                                              .color,
-                                                                    ),
-                                                                  ),
-                                                                ],
-                                                              )
-                                                            : null,
-                                                      ),
-                                                    ),
-                                                  );
-                                                }),
-                                            SliverList.builder(
-                                                itemCount: 1,
-                                                itemBuilder: (context, i) {
-                                                  if (seemore_vsb &&
-                                                      tasksLists.length > 3) {
-                                                    return GestureDetector(
-                                                      onTap: () {
-                                                        toggleDragSheet(null);
-                                                      },
-                                                      child: Center(
-                                                          child: Text(
-                                                              'see more',
-                                                              style: state
+                                                                    .completed
+                                                                    .name,
+                                                            onChanged: (_) {
+                                                              _todoBloc.add(
+                                                                  TodoEvent.toggle(
+                                                                      task:
+                                                                          todo,
+                                                                      status: StatusEnum
+                                                                          .completed));
+                                                            },
+                                                          ),
+                                                          trailing: IconButton(
+                                                              iconSize: 18,
+                                                              icon: const Icon(
+                                                                  Icons.edit),
+                                                              onPressed: () {
+                                                                context.pushNamed(
+                                                                    AppRouter
+                                                                        .addTodo,
+                                                                    extra: {
+                                                                      'isUpdate':
+                                                                          true,
+                                                                      'data':
+                                                                          todo,
+                                                                    });
+                                                              },
+                                                              color: state
                                                                       .isDarkMode
                                                                   ? AppThemes
                                                                       .darkTheme
                                                                       .textTheme
-                                                                      .labelMedium!
+                                                                      .titleMedium!
+                                                                      .color
                                                                   : AppThemes
                                                                       .lightTheme
                                                                       .textTheme
-                                                                      .labelMedium!)),
-                                                    );
-                                                  }
-                                                  return const SizedBox
-                                                      .shrink();
+                                                                      .titleMedium!
+                                                                      .color),
+                                                          title: Text(
+                                                            todo.title,
+                                                            style: TextStyle(
+                                                              color: state
+                                                                      .isDarkMode
+                                                                  ? AppThemes
+                                                                      .darkTheme
+                                                                      .textTheme
+                                                                      .titleSmall!
+                                                                      .color
+                                                                  : AppThemes
+                                                                      .lightTheme
+                                                                      .textTheme
+                                                                      .titleSmall!
+                                                                      .color,
+                                                              decoration: todo
+                                                                          .status ==
+                                                                      StatusEnum
+                                                                          .completed
+                                                                          .name
+                                                                  ? TextDecoration
+                                                                      .lineThrough
+                                                                  : null,
+                                                            ),
+                                                          ),
+                                                          subtitle: todo
+                                                                      .status ==
+                                                                  StatusEnum
+                                                                      .inProgress
+                                                                      .name
+                                                              ? Row(
+                                                                  children: [
+                                                                    Icon(
+                                                                        Icons
+                                                                            .pending_actions,
+                                                                        size:
+                                                                            12,
+                                                                        color: !state.isDarkMode
+                                                                            ? Colors.black
+                                                                            : Colors.white),
+                                                                    Text(
+                                                                      ' in progress',
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize:
+                                                                            11,
+                                                                        // fontStyle: FontStyle.italic,
+                                                                        color: state.isDarkMode
+                                                                            ? AppThemes.darkTheme.textTheme.labelSmall!.color
+                                                                            : AppThemes.lightTheme.textTheme.labelSmall!.color,
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                )
+                                                              : null,
+                                                        ),
+                                                      ),
+                                                      isLastItem
+                                                          ? AppSpacing
+                                                              .verticalSpacing24
+                                                          : const SizedBox
+                                                              .shrink(),
+                                                      isLastItem &&
+                                                              seemore_vsb &&
+                                                              tasksLists
+                                                                      .length >
+                                                                  3
+                                                          ? GestureDetector(
+                                                              onTap: () {
+                                                                toggleDragSheet(
+                                                                    null);
+                                                              },
+                                                              child: Center(
+                                                                  child: Text(
+                                                                      'see more',
+                                                                      style: state.isDarkMode
+                                                                          ? AppThemes
+                                                                              .darkTheme
+                                                                              .textTheme
+                                                                              .labelMedium!
+                                                                          : AppThemes
+                                                                              .lightTheme
+                                                                              .textTheme
+                                                                              .labelMedium!)),
+                                                            )
+                                                          : const SizedBox
+                                                              .shrink(),
+                                                      isLastItem
+                                                          ? AppSpacing
+                                                              .verticalSpacing48
+                                                          : const SizedBox
+                                                              .shrink(),
+                                                      isLastItem
+                                                          ? AppSpacing
+                                                              .verticalSpacing48
+                                                          : const SizedBox
+                                                              .shrink(),
+                                                    ],
+                                                  );
                                                 }),
                                           ],
                                         )),

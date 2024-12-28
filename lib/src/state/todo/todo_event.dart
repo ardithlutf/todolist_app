@@ -2,7 +2,7 @@ part of 'todo_bloc.dart';
 
 @freezed
 class TodoEvent with _$TodoEvent {
-  const factory TodoEvent.load({StatusEnum? filterStatus}) = _LoadTodo;
+  const factory TodoEvent.load() = _LoadTodo;
   const factory TodoEvent.add(
       {required String title,
       required String description,

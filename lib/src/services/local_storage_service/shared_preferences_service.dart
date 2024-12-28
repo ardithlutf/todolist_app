@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:todolist_app/src/common/enums.dart';
 import 'package:todolist_app/src/injector/injector.dart';
 import 'package:todolist_app/src/services/local_storage_service/local_storage_service.dart';
 
@@ -17,6 +18,8 @@ class SharedPreferencesService implements LocalStorageService {
   String isFirstUseKey = 'isFirstUseKey';
   @override
   String isLoggedInKey = 'isLoggedInKey';
+  @override
+  String statusKey = 'statusKey';
 
   @override
   FutureOr<void> init() async {
@@ -37,6 +40,9 @@ class SharedPreferencesService implements LocalStorageService {
   bool get isLoggedIn => _pref.getBool(isLoggedInKey) ?? false;
 
   @override
+  String get status => _pref.getString(statusKey) ?? '';
+
+  @override
   Future<bool> setIsDarkMode(bool isDarkMode) async {
     return await _pref.setBool(isDarkModeKey, isDarkMode);
   }
@@ -54,6 +60,11 @@ class SharedPreferencesService implements LocalStorageService {
   @override
   Future<bool> setToken(String token) async {
     return await _pref.setString(tokenKey, token);
+  }
+
+  @override
+  Future<bool> setStatus(StatusEnum? status) async {
+    return await _pref.setString(statusKey, status?.name ?? '');
   }
 
   @override
